@@ -1,0 +1,55 @@
+﻿@inject NavigationManager navigationManager
+@inject PersonInfoService PInfoService
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Pasport</th>
+            <th scope="col">INN</th>
+            <th scope="col">Mail</th>
+            <th scope="col">Change</th>
+
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            @if (personInfo == null)
+            {
+                <td>Loading...</td>
+            }
+            else
+            {
+                <td><input @bind-value="@personInfo.Name"></td>
+                <td><input @bind-value="@personInfo.Pasport"></td>
+                <td><input @bind-value="@personInfo.INN"></td>
+                <td><input @bind-value="@personInfo.Mail"></td>
+                <td>
+                    <button class="btn btn-warning" @onclick="PUTChanges">Save changes</button>
+                </td>
+            }
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public PersonInfoDTO personInfo { get; set; }
+
+
+    private async Task PUTChanges()
+    {
+        Console.WriteLine("PUT");
+        await PInfoService.PutAsync(personInfo.Id, personInfo);
+
+
+    }
+
+
+    private void NavigateTo()
+    {
+        navigationManager.NavigateTo("changePersonInfo/" + personInfo.Id);
+    }
+
+
+}

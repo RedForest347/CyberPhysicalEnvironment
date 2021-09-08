@@ -1,0 +1,46 @@
+﻿@inject NavigationManager navigationManager
+
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Pasport</th>
+            <th scope="col">INN</th>
+            <th scope="col">Mail</th>
+            <th scope="col">Change</th>
+
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            @if (personInfo == null)
+            {
+                <td>Loading...</td>
+            }
+            else
+            {
+                <td>@personInfo.Name</td>
+                <td>@personInfo.Pasport</td>
+                <td>@personInfo.INN</td>
+                <td>@personInfo.Mail</td>
+                <td>
+                    <button class="btn btn-warning" @onclick="NavigateTo">Change Info</button>
+                </td>
+            }
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public PersonInfoDTO personInfo { get; set; }
+
+
+    private void NavigateTo()
+    {
+        navigationManager.NavigateTo("changePersonInfo/" + personInfo.Id);
+    }
+
+
+}

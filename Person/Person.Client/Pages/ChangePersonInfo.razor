@@ -1,0 +1,21 @@
+﻿@page "/changePersonInfo/{Id}"
+@inject PersonInfoService PInfoService
+
+<h3>PersonInfo</h3>
+
+<ChangePersonInfoCmp personInfo="personInfo"></ChangePersonInfoCmp>
+
+
+
+@code {
+    [Parameter] public string Id { get; set; }
+
+
+    private PersonInfoDTO personInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        personInfo = await PInfoService.GetOnIdAsync(new Guid(Id));
+    }
+
+}
