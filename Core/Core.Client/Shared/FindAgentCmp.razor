@@ -1,0 +1,113 @@
+﻿@inject AgentService AService
+
+
+
+<table class="table table-striped">
+
+    <tbody>
+        <tr>
+            <td width="200">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Выберете тип агента
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        @if (agentTypes == null)
+                        {
+                            <a>Загрузка...</a>
+                        }
+                        else if (agentTypes.Count == 0)
+                        {
+                            <a>Нет доступных типов агентов</a>
+                        }
+                        else
+                        {
+                            @foreach (var type in agentTypes)
+                            {
+                                <a class="dropdown-item">@type.Name</a>
+                            }
+                        }
+                    </div>
+                </div>
+            </td>
+            <td>
+                <button class="btn btn-info">Сортировка</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input @bind-value="agentName" />
+            </td>
+            <td>
+                <button class="btn btn-outline-warning" @onclick="FindAgents">Найти</button>
+            </td>
+
+        </tr>
+    </tbody>
+
+</table>
+
+@if (foundAgents == null)
+{
+
+}
+else if (foundAgents.Count == 0)
+{
+    <p>Ничего не найдено</p>
+}
+else
+{
+    <ShowAgentsCmp OnAdditionalButtonClick="SelectAgent"
+                   AdditionalButtonText="Select"
+                   agents="foundAgents"
+                   NeedChangeDelete="false">
+    </ShowAgentsCmp>
+
+}
+
+
+
+@code {
+
+    [Parameter] public List<AgentTypeDTO> agentTypes { get; set; }
+    [Parameter] public List<AgentDTO> agents { get; set; }
+    [Parameter] public EventCallback<AgentDTO> FoundAgent { get; set; }
+    [Parameter] public EventCallback ToDefault { set => Default(); }
+
+
+    private string agentName = "";
+    private AgentTypeDTO agentType;
+    private List<AgentDTO> foundAgents = new List<AgentDTO>();
+
+    private async Task FindAgents()
+    {
+        foundAgents = new List<AgentDTO>();
+
+        if (agents == null) { }
+        else
+        {
+            foreach (AgentDTO agent in agents)
+            {
+                if (agent.Name.Contains(agentName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    foundAgents.Add(agent);
+                }
+            }
+        }
+    }
+
+    private void Default()
+    {
+        foundAgents = new List<AgentDTO>();
+        foundAgents = null;
+    }
+
+
+
+    private void SelectAgent(AgentDTO agent)
+    {
+        FoundAgent.InvokeAsync(agent);
+        foundAgents = null;
+    }
+
+}

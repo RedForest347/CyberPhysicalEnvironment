@@ -1,0 +1,28 @@
+﻿@page "/test"
+@inject AgentService AService
+
+
+
+<AgentTableCmp agents="agentList"></AgentTableCmp>
+
+
+
+
+
+
+@code {
+    List<AgentDTO> agentList;
+
+    private int ind = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UpdateAgentList();
+    }
+
+    private async Task UpdateAgentList()
+    {
+        agentList = await AService.GetAllAsync();
+    }
+}

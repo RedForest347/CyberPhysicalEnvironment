@@ -1,0 +1,40 @@
+﻿@page "/agentPage"
+@inject AgentService AService
+@inject AgentTypeService ATypeService
+
+<FindAgentCmp agents="agents" agentTypes="agentTypes"></FindAgentCmp>
+
+
+<AgentCellsCmp agents="agents" currentAgent="currentAgent"></AgentCellsCmp>
+
+
+
+@code {
+
+    AgentDTO currentAgent;
+    List<AgentDTO> agents;
+    List<AgentTypeDTO> agentTypes;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UpdateAgentList();
+        await UpdateAgentTypeList();
+    }
+
+    private async Task UpdateAgentList()
+    {
+        agents = await AService.GetAllAsync();
+        GetCurrentAgent();
+    }
+
+    private void GetCurrentAgent() // костыль
+    {
+        currentAgent = agents.Where(a => a.Name == "AgentCurrent").FirstOrDefault();
+    }
+
+    private async Task UpdateAgentTypeList()
+    {
+        agentTypes = await ATypeService.GetAllAsync();
+    }
+}

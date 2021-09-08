@@ -1,0 +1,289 @@
+﻿@inject LinkTypeService lTypeService
+@inject AgentService AService
+@inject LinkTypeService LTypeService
+@inject NavigationManager navigationManager
+
+
+<h2>Текущий Агент</h2>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Фото</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Установить связь</th>
+
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @if (currentAgent == null)
+        {
+            <tr>Загрузка...</tr>
+        }
+        else
+        {
+            <tr>
+                <td>
+                    <img src=https://i.pinimg.com/originals/25/66/1e/25661e1199d9d5025e69df86847396b8.jpg height="70" width="70">
+                </td>
+                <td>
+                    @currentAgent.Name
+                </td>
+                <td>
+                    <button class="btn btn-warning" title="Управление связью" @onclick='(() => NavigateTo("/newLink/" + currentAgent.Id))'>Установить новую связь</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+<h2>Список агентов, с которыми установлена связь:</h2>
+
+<h2>Входящие связи:</h2>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Фото</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Тип связи</th>
+            <th scope="col">Описание связи</th>
+            <th scope="col">Отношение</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @if (agents == null || !loadComplete)
+        {
+            <tr>Загрузка...</tr>
+        }
+        else if (agents.Count == 0)
+        {
+
+        }
+        else
+        {
+            foreach (LinkDTO link in currentAgent.InputLinks)
+            {
+                if (link.Agent2Checked)
+                {
+                    <tr>
+                        <td>
+                            <img src="https://yt3.ggpht.com/a/AATXAJxQ-vsy5oBe7BabwNVPZ1aQmwwQhjIEHNMkFI_F=s900-c-k-c0xffffffff-no-rj-mo" height="70" width="70">
+                        </td>
+                        <td>
+                            @link.Agent1.Name
+                        </td>
+                        <td>
+                            @link.LinkType.Name
+                        </td>
+                        <td>
+                            @link.Description
+                        </td>
+                        <td>
+                            <button class="btn btn-info" title="Управление связью" @onclick="() => NavigateToLinkChange(link)">Управление связью</button>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+
+<h2>Исходящие связи:</h2>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Фото</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Тип связи</th>
+            <th scope="col">Описание связи</th>
+            <th scope="col">Отношение</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @if (agents == null || !loadComplete)
+        {
+            <tr>
+                Загрузка...
+            </tr>
+        }
+        else if (agents.Count == 0)
+        {
+
+        }
+        else
+        {
+            foreach (LinkDTO link in currentAgent.OutputLinks)
+            {
+                if (link.Agent1Checked)
+                {
+                    <tr>
+                        <td>
+                            <img src="https://yt3.ggpht.com/a/AATXAJxQ-vsy5oBe7BabwNVPZ1aQmwwQhjIEHNMkFI_F=s900-c-k-c0xffffffff-no-rj-mo" height="70" width="70">
+                        </td>
+                        <td>
+                            @link.Agent2.Name
+                        </td>
+                        <td>
+                            @link.LinkType.Name
+                        </td>
+                        <td>
+                            @link.Description
+                        </td>
+                        <td>
+                            <button class="btn btn-info" title="Управление связью" @onclick="() => NavigateToLinkChange(link)">Управление связью</button>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+
+
+<h2>Ожидают подверждения:</h2>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Фото</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Тип связи</th>
+            <th scope="col">Описание связи</th>
+            <th scope="col">Отношение</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @if (agents == null || !loadComplete)
+        {
+            <tr>
+                Загрузка...
+            </tr>
+        }
+        else if (agents.Count == 0)
+        {
+
+        }
+        else
+        {
+            foreach (LinkDTO link in currentAgent.InputLinks)
+            {
+                if (!link.Agent2Checked)
+                {
+                    <tr>
+                        <td>
+                            <img src="https://yt3.ggpht.com/a/AATXAJxQ-vsy5oBe7BabwNVPZ1aQmwwQhjIEHNMkFI_F=s900-c-k-c0xffffffff-no-rj-mo" height="70" width="70">
+                        </td>
+                        <td>
+                            @link.Agent2.Name
+                        </td>
+                        <td>
+                            @link.LinkType.Name
+                        </td>
+                        <td>
+                            @link.Description
+                        </td>
+                        <td>
+                            <button class="btn btn-info" title="Управление связью" @onclick="() => NavigateToLinkChange(link)">Управление связью</button>
+                        </td>
+                    </tr>
+                }
+            }
+
+            foreach (LinkDTO link in currentAgent.OutputLinks)
+            {
+                if (!link.Agent1Checked)
+                {
+                    <tr>
+                        <td>
+                            <img src="https://yt3.ggpht.com/a/AATXAJxQ-vsy5oBe7BabwNVPZ1aQmwwQhjIEHNMkFI_F=s900-c-k-c0xffffffff-no-rj-mo" height="70" width="70">
+                        </td>
+                        <td>
+                            @link.Agent1.Name
+                        </td>
+                        <td>
+                            @link.LinkType.Name
+                        </td>
+                        <td>
+                            @link.Description
+                        </td>
+                        <td>
+                            <button class="btn btn-info" title="Управление связью" @onclick="() => NavigateToLinkChange(link)">Управление связью</button>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+
+
+
+@code {
+
+    [Parameter] public List<AgentDTO> agents { get; set; }
+    [Parameter] public List<AgentTypeDTO> agentTypes { get; set; }
+    [Parameter] public AgentDTO currentAgent { get; set; }
+
+    bool loadComplete = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (agents == null)
+        {
+            return;
+        }
+        else
+        {
+            foreach (AgentDTO agent in agents)
+            {
+                foreach (LinkDTO link in agent.InputLinks)
+                {
+                    link.Agent1 = await AService.GetOnIdAsync(link.Agent1Id);
+                    link.Agent2 = await AService.GetOnIdAsync(link.Agent2Id);
+                    link.LinkType = await LTypeService.GetOnIdAsync(link.LinkTypeId);
+                }
+                foreach (LinkDTO link in agent.OutputLinks)
+                {
+                    link.Agent1 = await AService.GetOnIdAsync(link.Agent1Id);
+                    link.Agent2 = await AService.GetOnIdAsync(link.Agent2Id);
+                    link.LinkType = await LTypeService.GetOnIdAsync(link.LinkTypeId);
+                }
+            }
+        }
+        loadComplete = true;
+    }
+
+    private void NavigateTo(string URI)
+    {
+        navigationManager.NavigateTo(URI);
+    }
+
+    private void NavigateToLinkChange(LinkDTO link)
+    {
+        navigationManager.NavigateTo("changeLink/" + link.Id + "/" + currentAgent.Id);
+    }
+
+
+    private void LinkManageButtonPressed(LinkTypeDTO linkType)
+    {
+
+    }
+
+    private LinkTypeDTO GetLinkType(LinkDTO link)
+    {
+        return lTypeService.GetOnIdAsync(link.LinkTypeId).Result;
+    }
+
+}

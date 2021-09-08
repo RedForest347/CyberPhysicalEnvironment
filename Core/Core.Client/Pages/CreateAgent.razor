@@ -1,0 +1,16 @@
+﻿@page "/createAgent"
+@inject AgentTypeService ATypeService
+
+<h3>CreateAgent</h3>
+<AddAgentCmp agentTypes="agentTypes"></AddAgentCmp>
+
+
+@code {
+
+    private List<AgentTypeDTO> agentTypes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        agentTypes = await ATypeService.GetAllAsync();
+    }
+}

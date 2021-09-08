@@ -1,0 +1,87 @@
+﻿@inject AgentService AService
+@inject NavigationManager navigationManager
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead class="thead-light">
+            <tr>
+                <th>Фото</th>
+                <th>Имя</th>
+                <th>Описание</th>
+                <th>Тип</th>
+                @if (NeedChangeDelete)
+                {
+                    <th>Изменить</th>
+                    <th>Удалить</th>
+                }
+                @if (OnAdditionalButtonClick.HasDelegate)
+            {
+            <th></th>
+            }
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (agents == null)
+            {
+                <tr>Загрузка...</tr>
+            }
+            else if (agents.Count == 0)
+            {
+                <tr>Элементы отсутствуют</tr>
+            }
+            else
+            {
+                @foreach (AgentDTO agent in agents)
+                {
+                    <tr>
+                        <td>
+                            <img src=https://i.pinimg.com/originals/25/66/1e/25661e1199d9d5025e69df86847396b8.jpg height="70" width="70">
+                        </td>
+                        <td>@agent.Name</td>
+                        <td>@agent.Description</td>
+                        <td>@agent.AgentTypeDto.Name</td>
+
+                        @if (NeedChangeDelete)
+                        {
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => NavigateToChangeAgent(agent.Id)">Изментить агента</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" @onclick="() => DeleteAgent(agent.Id)">Удалить агента</button>
+                            </td>
+                        }
+                        @if (OnAdditionalButtonClick.HasDelegate)
+                        {
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => OnAdditionalButtonClick.InvokeAsync(agent)">@AdditionalButtonText</button>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    [Parameter] public List<AgentDTO> agents { get; set; }
+    [Parameter] public bool NeedChangeDelete { get; set; } = false;
+    [Parameter] public EventCallback<AgentDTO> OnAdditionalButtonClick { get; set; }
+    [Parameter] public string AdditionalButtonText { get; set; } = "Выбрать";
+
+
+    private AgentTypeDTO currentAgentType = null;
+
+    private async Task DeleteAgent(Guid id)
+    {
+        await AService.DeleteAsync(id);
+    }
+
+    private void NavigateToChangeAgent(Guid id)
+    {
+        navigationManager.NavigateTo($"changeagent/{id}");
+    }
+}

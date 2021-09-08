@@ -1,0 +1,96 @@
+﻿@*представляет собой добавление Агента в БД, сконфигурированного тут.
+agentTypes - Все типы агентов, обязательный парамметр,
+в данном компоненте не изменяется.
+OnAgentAdded - Евент, при добавлении нового Агента*@
+
+
+@inject AgentService AService
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Имя</th>
+            <th scope="col">Описание</th>
+            <th scope="col">Статус</th>
+            <th scope="col">Тип агента</th>
+            <th scope="col">Добавить агента</th>
+        </tr>
+    </thead>
+
+
+    <tbody>
+        <tr>
+            <td>
+                <input @bind-value="@agentForPost.Name" />
+            </td>
+            <td>
+                <input @bind-value="@agentForPost.Description" />
+            </td>
+            <td>
+                <input @bind-value="@agentForPost.Status" />
+            </td>
+            <td>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        @ShowAgentType()
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                        @if (agentTypes == null)
+                        {
+                            <a class="dropdown-item">Не удалось щагрузить типы агентов</a>
+                        }
+                        else if (agentTypes.Count == 0)
+                        {
+                            <a class="dropdown-item">Доступные типы агентов отсутствуют</a>
+                        }
+                        else
+                        {
+                            @foreach (AgentTypeDTO agentType in agentTypes)
+                            {
+                                <a class="dropdown-item" @onclick="() => SelectAgentType(agentType)">@agentType.Name</a>
+                            }
+                        }
+                    </div>
+                </div>
+            </td>
+            <td>
+                <form>
+                    <button class="btn btn-primary" @onclick="PostAgent">Создать нового агента</button>
+                </form>
+            </td>
+        </tr>
+    </tbody>
+
+</table>
+
+
+
+
+@code {
+
+    [Parameter] public List<AgentTypeDTO> agentTypes { get; set; }
+    [Parameter] public EventCallback OnAgentAdded { get; set; }
+
+    private AgentDTO agentForPost = new AgentDTO();
+
+
+    private async void PostAgent()
+    {
+        agentForPost.Id = Guid.NewGuid();
+        agentForPost.RegisterTime = DateTime.Now;
+        await AService.PostAsync(agentForPost);
+        agentForPost = new AgentDTO();
+    }
+
+    private void SelectAgentType(AgentTypeDTO agentType)
+    {
+        agentForPost.AgentTypeDto = agentType;
+    }
+
+    private string ShowAgentType()
+    {
+        return agentForPost.AgentTypeDto?.Name.ToString() ?? "Не выбран";
+    }
+
+}

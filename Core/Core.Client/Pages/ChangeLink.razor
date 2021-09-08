@@ -1,0 +1,150 @@
+﻿@page "/changeLink/{LinkId}/{AgentId}"
+@inject LinkService LService
+@inject LinkTypeService LTypeService
+@inject AgentService AService
+@inject NavigationManager navigationManager
+
+
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Descripion</th>
+            <th scope="col">Status</th>
+            <th scope="col">LinkType</th>
+            <th scope="col">ConfirmConnection</th>
+            <th scope="col">Change</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (LinkTypes == null)
+        {
+            <tr>Загрузка...</tr>
+        }
+        else
+        {
+            <tr>
+                <td>
+                    <input @bind-value="@currentLink.Description" />
+                </td>
+                <td>
+                    <input @bind-value="@currentLink.Status" />
+                </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            @ShowLinkType()
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                            @if (LinkTypes == null)
+                            {
+                                <a class="dropdown-item">Не удалось загрузить типы связей</a>
+                            }
+                            else if (LinkTypes.Count == 0)
+                            {
+                                <a class="dropdown-item">Доступные типы связей отсутствуют</a>
+                            }
+                            else
+                            {
+                                @foreach (LinkTypeDTO linkType in LinkTypes)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectLinkType(linkType)">@linkType.Name</a>
+                                }
+                            }
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <input type="checkbox" @bind="LinkConfirmed" />
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="PutLink">Изменить связь</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+
+    [Parameter] public List<LinkTypeDTO> LinkTypes { get; set; }
+    [Parameter] public EventCallback<LinkDTO> OnCreateLink { get; set; }
+    [Parameter] public string LinkId { get; set; }
+    [Parameter] public string AgentId { get; set; }
+
+    public bool LinkConfirmed
+    {
+        get
+        {
+            if (currentLink.Agent1Id == currentAgent.Id)
+            {
+                return currentLink.Agent1Checked;
+            }
+            else if (currentLink.Agent2Id == currentAgent.Id)
+            {
+                return currentLink.Agent2Checked;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        set
+        {
+            if (currentLink.Agent1Id == currentAgent.Id)
+            {
+                currentLink.Agent1Checked = value;
+            }
+            else if (currentLink.Agent2Id == currentAgent.Id)
+            {
+                currentLink.Agent2Checked = value;
+            }
+            else
+            {
+                //BadRequest
+            }
+        }
+    }
+
+    private AgentDTO currentAgent;
+    private LinkDTO currentLink;
+    private LinkTypeDTO currentLinkType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentLink = await LService.GetOnIdAsync(new Guid(LinkId));
+        currentLinkType = await LTypeService.GetOnIdAsync(currentLink.LinkTypeId);
+        currentAgent = await AService.GetOnIdAsync(new Guid(AgentId));
+        LinkTypes = await LTypeService.GetAllAsync();
+    }
+
+    private async Task SelectLinkType(LinkTypeDTO selectedLinkType)
+    {
+        currentLinkType = selectedLinkType;
+    }
+
+    private string ShowLinkType()
+    {
+        return currentLinkType?.Name ?? "Select Link Type";
+    }
+
+    private async Task PutLink()
+    {
+        currentLink.LinkType = currentLinkType;
+        currentLink.LinkTypeId = currentLinkType.Id;
+        currentLink.Agent1 = null;
+        currentLink.Agent2 = null;
+        await LService.PutAsync(currentLink.Id, currentLink);
+        NavigateToAgentPage();
+    }
+
+    private void NavigateToAgentPage()
+    {
+        navigationManager.NavigateTo("agentPage");
+    }
+
+}

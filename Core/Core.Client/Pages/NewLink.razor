@@ -1,0 +1,65 @@
+﻿@page "/newLink/{Id}"
+@*id агента, который создает связь*@
+@inject AgentService AService
+@inject AgentTypeService ATypeService
+@inject LinkTypeService LTypeService
+@inject NavigationManager navigationManager
+
+
+<FindAgentCmp agents="agents"
+              agentTypes="agentTypes"
+              ToDefault="ToDefault"
+              FoundAgent="SelectAgent">
+
+</FindAgentCmp>
+
+
+@if (Agent2 != null)
+{
+    <h3>Выбранный Агент</h3>
+    <ShowAgentsCmp agents="new List<AgentDTO>() { Agent2 }"
+                   NeedChangeDelete="false">
+
+    </ShowAgentsCmp>
+}
+
+
+@if (Agent2 != null)
+{
+    <CreateLinkCmp LinkTypes="linkTypes"
+                   Agent1="Agent1"
+                   Agent2="Agent2">
+
+    </CreateLinkCmp>
+}
+
+
+@code {
+
+    [Parameter] public EventCallback ToDefault { get; set; }
+    [Parameter] public string Id { get; set; }
+
+    private List<AgentTypeDTO> agentTypes { get; set; }
+    private List<AgentDTO> agents { get; set; }
+
+    private List<LinkTypeDTO> linkTypes { get; set; }
+
+    private AgentDTO Agent1;
+    private AgentDTO Agent2;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        agents = await AService.GetAllAsync();
+        agentTypes = await ATypeService.GetAllAsync();
+        linkTypes = await LTypeService.GetAllAsync();
+        Agent1 = await AService.GetOnIdAsync(new Guid(Id));
+    }
+
+    private void SelectAgent(AgentDTO agent)
+    {
+        Agent2 = agent;
+        ToDefault.InvokeAsync();
+    }
+
+}

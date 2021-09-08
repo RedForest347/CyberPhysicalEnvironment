@@ -1,0 +1,105 @@
+﻿@inject LinkService LService
+
+<h3>CreateLinkCmp</h3>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Описание</th>
+            <th scope="col">Статус</th>
+            <th scope="col">Тип связи</th>
+            <th scope="col">Создать</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (LinkTypes == null)
+        {
+            <tr>Загрузка...</tr>
+        }
+        else
+        {
+            <tr>
+                <td>
+                    <input @bind-value="@currentLink.Description" />
+                </td>
+                <td>
+                    <input @bind-value="@currentLink.Status" />
+                </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            @LinkTypeName
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                            @if (LinkTypes == null)
+                            {
+                                <a class="dropdown-item">Не удалось загрузить типы связей</a>
+                            }
+                            else if (LinkTypes.Count == 0)
+                            {
+                                <a class="dropdown-item">Нет доступных типов связей</a>
+                            }
+                            else
+                            {
+                                @foreach (LinkTypeDTO linkType in LinkTypes)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectLinkType(linkType)">@linkType.Name</a>
+                                }
+                            }
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <form>
+                        <button class="btn btn-primary" @onclick="CreateLink">Создать связь</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+
+    [Parameter] public AgentDTO Agent1 { get; set; } // из которого идет связь
+    [Parameter] public AgentDTO Agent2 { get; set; } //  к которому идет связь
+    [Parameter] public List<LinkTypeDTO> LinkTypes { get; set; }
+    [Parameter] public EventCallback<LinkDTO> OnCreateLink { get; set; }
+
+    private string LinkTypeName { get => currentLinkType?.Name ?? "Тип связи не выбран"; }
+
+    private LinkDTO currentLink = new LinkDTO();
+    private LinkTypeDTO currentLinkType;
+
+    private async Task CreateLink()
+    {
+        SetLinkParameters();
+        await LService.PostAsync(currentLink);
+    }
+
+    private void SetLinkParameters()
+    {
+        currentLink.Id = Guid.NewGuid();
+        currentLink.Agent1 = currentLink.Agent2 = null;
+        currentLink.Agent1Checked = true;
+        currentLink.Agent2Checked = false;
+        currentLink.Agent1Id = Agent1.Id;
+        currentLink.Agent2Id = Agent2.Id;
+
+        currentLink.ActiveLinkFlag = false;
+        currentLink.CheckedTime = DateTime.Now;
+        currentLink.LinkTypeId = currentLinkType.Id;
+        currentLink.LinkType = currentLinkType;
+    }
+
+
+
+
+    private void SelectLinkType(LinkTypeDTO selectedLinkType)
+    {
+        currentLinkType = selectedLinkType;
+    }
+}

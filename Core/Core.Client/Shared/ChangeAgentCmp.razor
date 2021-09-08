@@ -1,0 +1,104 @@
+﻿@*Представляет собой таблицу с одной строкой, в которой конфигурируются
+    параметры агента currentAgent. currentAgent - Агент, который имеет Id - AgentId
+    AgentId - обязательный параметр, представляющий собой Id изменяемого Агента
+    по нажатии на кнопку Update Agent происходит PUT запрос на сервер.
+    также, вызывается Ивент onAgentChenged.
+*@
+
+
+@inject AgentService AService
+@inject NavigationManager navigationManager 
+
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Имя</th>
+            <th scope="col">Описание</th>
+            <th scope="col">Статус</th>
+            <th scope="col">Код типа агента</th>
+            <th scope="col">Изменить агента</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (currentAgent == null)
+        {
+            <tr>Агент не выбран</tr>
+        }
+        else
+        {
+            <tr>
+                <td>
+                    <input @bind-value="@currentAgent.Name" />
+                </td>
+                <td>
+                    <input @bind-value="@currentAgent.Description" />
+                </td>
+                <td>
+                    <input @bind-value="@currentAgent.Status" />
+                </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            @ShowAgentType()
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                            @if (typeList == null)
+                            {
+                                <a class="dropdown-item">Не удалось загрузить типы агентов</a>
+                            }
+                            else if (typeList.Count == 0)
+                            {
+                                <a class="dropdown-item">Нет доступных типов агентов</a>
+                            }
+                            else
+                            {
+                                @foreach (AgentTypeDTO agentType in typeList)
+                                {
+                                    <a class="dropdown-item" @onclick="() => SelectAgentType(agentType)">@agentType.Name</a>
+                                }
+                            }
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="PutAgent">Изменить агента</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+@code {
+
+    [Parameter] public List<AgentTypeDTO> typeList { get; set; }
+    [Parameter] public Guid AgentId { get; set; }
+    [Parameter] public EventCallback onAgentChenged { get; set; }
+
+    private AgentDTO currentAgent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentAgent = await AService.GetOnIdAsync(AgentId);
+    }
+
+    private string ShowAgentType()
+    {
+        return currentAgent.AgentTypeDto?.Name.ToString() ?? "Не выбрано";
+    }
+
+    private void SelectAgentType(AgentTypeDTO agentType)
+    {
+        currentAgent.AgentTypeDto = agentType;
+    }
+
+    private async void PutAgent()
+    {
+        await AService.PutAsync(currentAgent.Id, currentAgent);
+        await onAgentChenged.InvokeAsync();
+    }
+}

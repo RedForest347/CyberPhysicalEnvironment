@@ -1,0 +1,27 @@
+﻿@page "/changeAgent/{Id}"
+@inject AgentService AService
+@inject AgentTypeService ATypeService
+@inject NavigationManager navigationManager
+
+<h2>Change Agent</h2>
+<ChangeAgentCmp agents="agents" AgentId="AgentId" typeList="agentTypes"></ChangeAgentCmp>
+
+<AddAgentCmp agents="agents" agentTypes="agentTypes"></AddAgentCmp>
+
+
+@code {
+
+    [Parameter] public string Id { get; set; }
+    private Guid AgentId;
+    private List<AgentDTO> agents;
+    private List<AgentTypeDTO> agentTypes;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        AgentId = new Guid(Id);
+        agents = await AService.GetAllAsync();
+        agentTypes = await ATypeService.GetAllAsync();
+        Console.WriteLine("count = " + agentTypes.Count);
+    }
+}
